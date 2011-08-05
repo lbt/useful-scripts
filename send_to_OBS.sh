@@ -81,9 +81,8 @@ fi
 echo "################################################################"
 echo Sending to OBS
 # Build succeeded - clean out the OBS dir and use new tarballs
-# This may need tweaking for patches too
-rm -f $OBSDIR/*debian.tar.gz
-rm -f $OBSDIR/*dsc
+rm -f $OBSDIR/*
+
 # is there a gem here?
 if [[ -n "$(find . -maxdepth 1 -name '*.gem' -print -quit)" ]]; then
     rm -f $OBSDIR/*gem
