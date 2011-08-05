@@ -1,5 +1,6 @@
-#!/bin/bash -x
+#!/bin/bash
 
+#set -x
 set -e
 
 require_clean_work_tree () {
