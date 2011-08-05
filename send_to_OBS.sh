@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 set -e
 
@@ -44,6 +44,7 @@ if [[ -f debian/gbp.conf ]]; then
     rm -rf $BUILD/*
     echo About to build
     # Make the debian.tar.gz and dsc
+    git checkout debian
     git-buildpackage --git-ignore-new -S -uc -us -tc
 else
     GBP="no"
@@ -53,6 +54,10 @@ fi
 # Make the gem
 echo "################################################################"
 echo Make gem
+# If we have GBP then apply patches (in debian/) for any gem build
+if [[ $GBP == "yes" ]]; then
+    gbp-pq import
+fi
 if [[ -n "$(find . -maxdepth 1 -name '*.gemspec' -print -quit)" ]]; then
     echo Building *.gemspec
     for i in *.gemspec; do
@@ -66,6 +71,11 @@ elif [[ -n "$(find . -maxdepth 1 -name '*.yml' -print -quit)" ]]; then
 else
     # Try a rake gem
     rake gem || true
+fi
+# And restore us to the debian branch
+if [[ $GBP == "yes" ]]; then
+    git checkout debian
+    gbp-pq drop 
 fi
 
 echo "################################################################"
