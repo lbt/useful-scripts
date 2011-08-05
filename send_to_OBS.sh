@@ -31,17 +31,37 @@ require_clean_work_tree () {
     fi
 }
 
+add_sha1_to_version() {
+    sed -i "1s/-[^-]*)/$HEADSHA1)/" debian/changelog
+    sed -i "/Release:/s/$/$HEADSHA1/" rpm/boss.spec
+    git branch -f tmp_sha1
+    git checkout tmp_sha1
+    git add rpm/boss.spec debian/changelog
+    git commit -m"Temporary sha1 version"
+}
+
+rm_sha1_from_version() {
+    git checkout $HEAD
+    git branch -D tmp_sha1
+    git branch -D patch-queue/tmp_sha1
+}
+
 usage()
 {
     cat <<EOF
-    usage: $1 -p project [pkg]
+    usage: $1 [-r] -p project [pkg]
+       -p specifies the project
+       -r specifies a 'real' release (no sha1)
        Send the current package to OBS
        if pkg is omitted uses the CWD name.
 
-git should be setup to have a pristine branch and a packaging branch
+git can be setup to have a pristine branch and a packaging branch
 There should be a debian/gbp.conf file specifing
 debian-branch     (typically pkg or debian)
 upstream-branch   (typically master)
+In this case the spec will use 
+
+Alternatively if native packaging
 
 You should be on the pkg branch to build a proper build
 
@@ -64,11 +84,14 @@ BUILDAREA=/some/tmp/build-area
 
 require_clean_work_tree
 
+HEAD=$(git show-ref --head -s HEAD)
+
 BRANCH=$(git status -bs | grep '##' | cut -d' ' -f2)
 
-HEAD=$(git show-ref -s HEAD --abbrev)
+HEADSHA1=$(git show-ref --head -s HEAD --abbrev)
 
-while getopts "p:" opt; do
+REAL=no
+while getopts "p:r" opt; do
     case $opt in
 	p ) 
 	    [[ -d $OBSBASE ]] || { echo no such dir $OBSBASE; exit 1; }
@@ -79,6 +102,7 @@ while getopts "p:" opt; do
 	    }
 	    OBSPROJ=$(cd $OBSBASE/$OPTARG;pwd)
 	    ;;
+	r ) REAL=yes;;
 	\? ) usage
             exit 1;;
 	* ) usage
@@ -109,16 +133,22 @@ echo Debian : $VERSION
 if [[ -f debian/gbp.conf ]]; then
     GBP="yes"
     UP_BRANCH=$(grep upstream-branch= debian/gbp.conf | cut -f2 -d=)
-    DEB_BRANCH=$(grep debian-branch= debian/gbp.conf | cut -f2 -d=)
-    DEB_BRANCH=${DEB_BRANCH:-${BRANCH}}
+    PKG_BRANCH=$(grep debian-branch= debian/gbp.conf | cut -f2 -d=)
+    PKG_BRANCH=${PKG_BRANCH:-${BRANCH}}
     [[ -d $BUILD ]] || mkdir $BUILD
     rm -rf $BUILD/*
     echo About to build
     # Make the debian.tar.gz and dsc
-    git checkout $DEB_BRANCH
+    git checkout $PKG_BRANCH
+    if [[ $REAL == "no" ]]; then
+	add_sha1_to_version
+    fi
     git-buildpackage --git-ignore-new -S -uc -us -tc
 else
     GBP="no"
+    if [[ $REAL == "no" ]]; then
+	add_sha1_to_version
+    fi
     dpkg-buildpackage -S -uc -us -tc
 fi
 
@@ -149,7 +179,7 @@ fi
 
 # And restore us to the debian branch
 if [[ $GBP == "yes" ]]; then
-    git checkout $DEB_BRANCH
+    git checkout $PKG_BRANCH
     gbp-pq drop || true
 fi
 
@@ -186,6 +216,11 @@ dpkg-parsechangelog -c1 | (
     osc ar
     osc ci
 )
+
+if [[ $REAL == "no" ]]; then
+    rm_sha1_from_version
+fi    
+
 
 # Debian Package Dependencies
 # git-buildpackage
