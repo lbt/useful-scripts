@@ -41,7 +41,7 @@ add_sha1_to_version() {
 }
 
 rm_sha1_from_version() {
-    git checkout $HEAD
+    git checkout -f $BRANCH
     git branch -D tmp_sha1
     git branch -D patch-queue/tmp_sha1
 }
