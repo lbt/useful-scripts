@@ -127,6 +127,10 @@ BUILD=$(readlink -e $BUILDAREA)
 
 VERSION=$(dpkg-parsechangelog -c1 | grep Version | cut -f2 -d" ")
 
+# Check and tidy up hangover branches
+git rev-parse -q --verify tmp_sha1 > /dev/null &&  git branch -D tmp_sha1
+git rev-parse -q --verify patch-queue/tmp_sha1 > /dev/null &&  git branch -D patch-queue/tmp_sha1
+
 echo "################################################################"
 echo Make debian package
 echo Debian : $VERSION
