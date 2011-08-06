@@ -84,11 +84,13 @@ BUILDAREA=/some/tmp/build-area
 
 require_clean_work_tree
 
-HEAD=$(git show-ref --head -s HEAD)
+HEAD=$(git rev-parse HEAD)
 
-BRANCH=$(git status -bs | grep '##' | cut -d' ' -f2)
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
-HEADSHA1=$(git show-ref --head -s HEAD --abbrev)
+trap "git checkout -f $BRANCH; exit" INT TERM EXIT
+
+HEADSHA1=$(git rev-parse --short HEAD)
 
 REAL=no
 while getopts "p:r" opt; do
