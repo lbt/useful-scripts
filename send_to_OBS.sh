@@ -196,7 +196,7 @@ echo Sending to OBS
 (cd $OBSDIR; osc up)
 
 # Build succeeded - clean out the OBS dir and use new tarballs
-rm -f $OBSDIR/*
+find $OBSDIR -mindepth 1 -maxdepth 1 -type f -name "[^_]*" -print0 | xargs -0 rm -f 
 
 if [[ $GBP == "yes" ]]; then
     mv $BUILD/* $OBSDIR/
