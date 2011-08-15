@@ -139,7 +139,7 @@ echo Debian : $VERSION
 if [[ -f debian/gbp.conf ]]; then
     GBP="yes"
     UP_BRANCH=$(grep upstream-branch= debian/gbp.conf | cut -f2 -d=)
-    PKG_BRANCH=$(grep debian-branch= debian/gbp.conf | cut -f2 -d=)
+    #PKG_BRANCH=$(grep debian-branch= debian/gbp.conf | cut -f2 -d=)
     PKG_BRANCH=${PKG_BRANCH:-${BRANCH}}
     [[ -d $BUILD ]] || mkdir $BUILD
     rm -rf $BUILD/*
