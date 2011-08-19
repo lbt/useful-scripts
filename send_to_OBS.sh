@@ -92,7 +92,7 @@ OBSBASE=
 # Where git-buidlpackage is setup to produce builds, configured in
 # /etc/git-buildpackage
 BUILDAREA=
-# NAMESPACE is optional dir under OBSBASE also used as apiurl alias with osc
+# NAMESPACE is an apiurl alias with osc which is also used as a dir under OBSBASE
 # (setup in oscrc)
 NAMESPACE=
 EOF
@@ -106,10 +106,10 @@ fi
 
 OSC()
 {
-if [[ -e $NAMESPACE ]] ; then
-	osc $@
-else
+if [[ $NAMESPACE ]] ; then
     osc  -A $NAMESPACE $@
+else
+    osc $@
 fi
 }
 
