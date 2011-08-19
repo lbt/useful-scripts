@@ -56,14 +56,19 @@ usage()
        if pkg is omitted uses the CWD name.
 
 git can be setup to have a pristine branch and a packaging branch
+
 There should be a debian/gbp.conf file specifing
 debian-branch     (typically pkg or debian)
 upstream-branch   (typically master)
-In this case the spec will use 
 
-Alternatively if native packaging
+In this case the .spec will use the .orig tarball and the .spec from
+the rpm/ directory. Patches should be extracted from the debian/patches dir 
+and applied with the .spec too.
 
-You should be on the pkg branch to build a proper build
+You should be on the pkg branch to build a 'real' build.
+
+If you do not specify -r then the debian-branch and upstream-branch
+will be ignored and both will be force-set to the current branch.
 
 If you are on any other branch then the current sha1 will be appended
 to the Release.
@@ -128,6 +133,9 @@ trap "git checkout -f $BRANCH; exit" INT TERM EXIT
 
 HEADSHA1=$(git rev-parse --short HEAD)
 
+# Override the upstream/debian specified in gbp.conf (unless -r later)
+USING_BRANCHES=" --git-debian-branch=$BRANCH --git-upstream-branch=$BRANCH "
+
 REAL=no
 while getopts "p:r" opt; do
     case $opt in
@@ -141,7 +149,10 @@ while getopts "p:r" opt; do
 
 	    OBSPROJ=$(cd $OBSBASE/$OPTARG;pwd)
 	    ;;
-	r ) REAL=yes;;
+	r ) REAL=yes
+	    # This is real - don't override the upstream/debian specified in gbp.conf
+	    USING_BRANCHES=""
+	    ;;
 	\? ) usage
             exit 1;;
 	* ) usage
@@ -190,7 +201,7 @@ if [[ -f debian/gbp.conf ]]; then
     if [[ $REAL == "no" ]]; then
 	add_sha1_to_version
     fi
-    git-buildpackage --git-ignore-new -S -uc -us -tc
+    git-buildpackage --git-ignore-new -S -uc -us -tc $USING_BRANCHES
 else
     GBP="no"
     if [[ $REAL == "no" ]]; then
