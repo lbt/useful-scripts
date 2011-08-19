@@ -73,16 +73,52 @@ EOF
 }
 
 # Local config
+# Base directory where project checkouts are placed
 OBSBASE="~/obs/"
+# Where git-buidlpackage is setup to produce builds, configured in
+# /etc/git-buildpackage
 BUILDAREA=/some/tmp/build-area
+# NAMESPACE is optional dir under OBSBASE also used as apiurl alias with osc
+# (setup in oscrc)
+#NAMESPACE=
 
 # Override above with personal values
-. ~/.send_to_OBS.conf
+if [ -d  "$HOME/.send_to_OBS.conf" ]; then
+	. $HOME/.send_to_OBS.conf
+else
+	cat <<EOF >>$HOME/.send_to_OBS.conf
+# Base directory where project checkouts are placed
+OBSBASE=
+# Where git-buidlpackage is setup to produce builds, configured in
+# /etc/git-buildpackage
+BUILDAREA=
+# NAMESPACE is optional dir under OBSBASE also used as apiurl alias with osc
+# (setup in oscrc)
+NAMESPACE=
+EOF
+	echo "Please set the required configuration values in $HOME/.send_to_OBS.conf"
+	exit 1
+fi
+
+if [[ ! -e $NAMESPACE ]] ; then
+    OBSBASE=$OBSBASE/$NAMESPACE/
+fi
+
+OSC()
+{
+if [[ -e $NAMESPACE ]] ; then
+	osc $@
+else
+    osc  -A $NAMESPACE $@
+fi
+}
 
 # We need to be in a git repo
 [[ ! -d .git ]] && { echo Not in a .git project ; exit 1 ; }
 
 require_clean_work_tree
+
+GITWD=$(pwd)
 
 HEAD=$(git rev-parse HEAD)
 
@@ -100,8 +136,9 @@ while getopts "p:r" opt; do
 	    [[ -d $OBSBASE/$OPTARG ]] || { 
 		echo attempt to get $OPTARG
 		cd $OBSBASE
-		osc co $OPTARG
+		OSC co $OPTARG
 	    }
+
 	    OBSPROJ=$(cd $OBSBASE/$OPTARG;pwd)
 	    ;;
 	r ) REAL=yes;;
@@ -114,16 +151,20 @@ done
 shift $(($OPTIND - 1))
 
 PACKAGE=${1:-$(basename $(pwd))}
-
 OBSDIR=$OBSPROJ/$PACKAGE
+
 [[ -d $OBSDIR ]] || { 
     echo attempt to get $PACKAGE from OBS
     cd $OBSPROJ
-    osc co $PACKAGE
+    OSC co $PACKAGE || OSC mkpac $PACKAGE
 }
 [[ ! -d $OBSDIR ]] && { echo $OBSDIR not present ; exit 1 ; }
 
+[[ ! -d $BUILDAREA ]] && mkdir $BUILDAREA
+
 BUILD=$(readlink -e $BUILDAREA)
+
+cd $GITWD
 
 VERSION=$(dpkg-parsechangelog -c1 | grep Version | cut -f2 -d" ")
 
@@ -155,12 +196,14 @@ else
     if [[ $REAL == "no" ]]; then
 	add_sha1_to_version
     fi
-    dpkg-buildpackage -S -uc -us -tc -i
+    dpkg-buildpackage -S -uc -us -tc
 fi
 
 # If we have GBP then apply patches (in debian/) for any gem build
 if [[ $GBP == "yes" ]]; then
-    gbp-pq import
+    if [ -d "debian/patches" ] ; then
+		gbp-pq import
+	fi
 fi
 
 # See if we're ruby
@@ -193,7 +236,7 @@ echo "################################################################"
 echo Sending to OBS
 
 # Update to ensure we can overwrite - git is master
-(cd $OBSDIR; osc up)
+(cd $OBSDIR; OSC up) || true
 
 # Build succeeded - clean out the OBS dir and use new tarballs
 find $OBSDIR -mindepth 1 -maxdepth 1 -type f -name "[^_]*" -print0 | xargs -0 rm -f 
@@ -219,8 +262,8 @@ dpkg-parsechangelog -c1 | (
     cd $OBSDIR
     # Rename symlinks to truename for OBS
     (l=$(find . -maxdepth 1 -type l -print -quit) && t=$(readlink $l) && rm $l && mv $t $l) || true
-    osc ar
-    osc ci
+    OSC ar
+    OSC ci --skip-validation
 )
 
 if [[ $REAL == "no" ]]; then
