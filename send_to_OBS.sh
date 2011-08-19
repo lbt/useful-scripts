@@ -83,7 +83,7 @@ BUILDAREA=/some/tmp/build-area
 #NAMESPACE=
 
 # Override above with personal values
-if [ -d  "$HOME/.send_to_OBS.conf" ]; then
+if [ -e  "$HOME/.send_to_OBS.conf" ]; then
 	. $HOME/.send_to_OBS.conf
 else
 	cat <<EOF >>$HOME/.send_to_OBS.conf
