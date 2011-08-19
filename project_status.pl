@@ -9,7 +9,7 @@ my $ua = LWP::UserAgent->new;
 $ua->agent("$0/0.1 " . $ua->agent);
 
 my %Packages;
-my @all;
+my %all;
 
 my @repos = (['home:lbt:MINT', 'http://repo.pub.meego.com/home:/lbt:/MINT/Debian_6.0/Packages'],
 	     ['Project:MINT:Devel:BOSS', 'http://repo.pub.meego.com/Project:/MINT:/Devel:/BOSS/Debian_6.0/Packages'],
@@ -30,7 +30,7 @@ foreach my $repo (@repos) {
     while (<$RH>) {
       if (/^Package: (.*)$/) {
 	$pkg = $1;
-	push @all, $pkg;
+	$all{$pkg}++;
 	next;
       }
       if (/^Version: (.*)$/) {
@@ -50,7 +50,7 @@ foreach my $repo (@repos) {
 }
 print "\n";
 
-foreach my $pkg (sort @all) {
+foreach my $pkg (sort keys %all) {
   printf "%-30s", $pkg;
   foreach my $repo (@repos) {
     print "\t";
