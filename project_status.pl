@@ -12,7 +12,7 @@ my %Packages;
 my %all;
 
 my @repos = (['home:lbt:MINT', 'http://repo.pub.meego.com/home:/lbt:/MINT/Debian_6.0/Packages'],
-	     ['Project:MINT:Devel:BOSS', 'http://repo.pub.meego.com/Project:/MINT:/Devel:/BOSS/Debian_6.0/Packages'],
+	     ['Project:MINT:Devel:BOSSlink', 'http://repo.pub.meego.com/Project:/MINT:/Devel:/BOSSlink/Debian_6.0/Packages'],
 	     ['Project:MINT:Testing', 'http://repo.pub.meego.com/Project:/MINT:/Testing/Debian_6.0/Packages'],
 	    );
 
