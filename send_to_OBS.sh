@@ -212,7 +212,7 @@ fi
 
 # If we have GBP then apply patches (in debian/) for any gem build
 if [[ $GBP == "yes" ]]; then
-    if [ -d "debian/patches" ] ; then
+    if [ -d "debian/patches" ] ; then
 		gbp-pq import
 	fi
 fi
