@@ -1,0 +1,15 @@
+Source: mint-utils
+Section: unknown
+Priority: extra
+Maintainer: Islam Amer <islam.amer@nokia.com>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.2
+Homepage: http://wiki.meego.com/Release_Infrastructure
+Vcs-Git: git://github.com/iamer/useful-scripts.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/mint-utils.git;a=summary
+
+Package: mint-utils
+Architecture: all
+Depends: ${misc:Depends}
+Description: Various useful scripts
+ Various useful scripts related to the mint workflow
