@@ -280,7 +280,7 @@ dpkg-parsechangelog -c1 | (
     # Rename symlinks to truename for OBS
     (l=$(find . -maxdepth 1 -type l -print -quit) && t=$(readlink $l) && rm $l && mv $t $l) || true
     OSC ar
-    OSC ci --skip-validation
+    OSC ci --skip-validation -F -
 )
 
 if [[ $REAL == "no" ]]; then
