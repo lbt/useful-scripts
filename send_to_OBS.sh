@@ -175,6 +175,10 @@ OBSDIR=$OBSPROJ/$PACKAGE
 
 BUILD=$(readlink -e $BUILDAREA)
 
+# BAD IDEA
+#rm -rf $BUILD/*
+[ "$(ls -A $BUILD)" ] && echo "BUILDAREA $BUILD is not empty, please check the contents and clean it." && exit 1
+
 cd $GITWD
 
 VERSION=$(dpkg-parsechangelog -c1 | grep Version | cut -f2 -d" ")
@@ -193,8 +197,7 @@ if [[ -f debian/gbp.conf ]]; then
     UP_BRANCH=$(grep upstream-branch= debian/gbp.conf | cut -f2 -d=)
     #PKG_BRANCH=$(grep debian-branch= debian/gbp.conf | cut -f2 -d=)
     PKG_BRANCH=${PKG_BRANCH:-${BRANCH}}
-    [[ -d $BUILD ]] || mkdir $BUILD
-    rm -rf $BUILD/*
+
     echo About to build
     # Make the debian.tar.gz and dsc
     git checkout $PKG_BRANCH
