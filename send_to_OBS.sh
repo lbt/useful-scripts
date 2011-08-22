@@ -240,6 +240,10 @@ elif [[ -e Rakefile ]]; then
     RUBY=yes
 fi
 
+# Copy over anything in rpm/ to BUILD so we pickup possible sha1sum version
+# modification later
+cp rpm/* $BUILD/ 2>/dev/null || true
+
 # And restore us to the debian branch
 if [[ $GBP == "yes" ]]; then
     git checkout $PKG_BRANCH
@@ -262,10 +266,9 @@ else
     mv ../*$VERSION* $OBSDIR
     # copy any orig tarballs
     cp -a ../*orig* $OBSDIR || true
+	# pickup the rpm related files
+    mv $BUILD/* $OBSDIR/
 fi
-
-# Copy over anything in rpm/
-cp rpm/* $OBSDIR/ 2>/dev/null || true
 
 # and over any gem file, possibly in pkg/
 mv *.gem $OBSDIR/ 2>/dev/null || true
