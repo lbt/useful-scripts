@@ -8,7 +8,7 @@ Version: %{version}
 Release: %{release}
 Source0: %{name}_%{version}.orig.tar.gz
 License: GPLv2+
-Group: Development/Languages
+Group: Development/Tools/Building
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Prefix: %{_prefix}
 BuildArch: noarch
@@ -37,3 +37,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root)
 /usr/bin/*
+
+%changelog
+* Tue Aug 23 2011 Islam Amer <islam.amer@nokia.com> 0.0.1
+- Initial packaging
