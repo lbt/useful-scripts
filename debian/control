@@ -10,6 +10,6 @@ Vcs-Git: git://github.com/iamer/useful-scripts.git
 
 Package: mint-utils
 Architecture: all
-Depends: ${misc:Depends}, osc, git
+Depends: ${misc:Depends}, ${perl:Depends}, osc, git
 Description: Various useful scripts
  Various useful scripts related to the mint workflow
