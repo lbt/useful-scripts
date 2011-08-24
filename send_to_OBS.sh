@@ -205,7 +205,7 @@ if [[ -f debian/gbp.conf ]]; then
     if [[ $REAL == "no" ]]; then
 	add_sha1_to_version
     fi
-    git-buildpackage --git-ignore-new -S -uc -us -tc $USING_BRANCHES
+    git-buildpackage --git-export-dir="$BUILD" --git-ignore-new -S -uc -us -tc $USING_BRANCHES
 else
     GBP="no"
     if [[ $REAL == "no" ]]; then
