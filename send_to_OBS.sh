@@ -144,8 +144,7 @@ while getopts "p:r" opt; do
 	    [[ -d $OBSBASE ]] || { echo no such dir $OBSBASE; exit 1; }
 	    [[ -d $OBSBASE/$OPTARG ]] || { 
 		echo attempt to get $OPTARG
-		cd $OBSBASE
-		OSC co $OPTARG
+		( cd $OBSBASE && OSC co $OPTARG )
 	    }
 
 	    OBSPROJ=$(cd $OBSBASE/$OPTARG;pwd)
@@ -167,8 +166,9 @@ OBSDIR=$OBSPROJ/$PACKAGE
 
 [[ -d $OBSDIR ]] || { 
     echo attempt to get $PACKAGE from OBS
-    cd $OBSPROJ
-    OSC co $PACKAGE || OSC mkpac $PACKAGE
+    ( cd $OBSPROJ && {
+        OSC co $PACKAGE || OSC mkpac $PACKAGE
+    } )
 }
 [[ ! -d $OBSDIR ]] && { echo $OBSDIR not present ; exit 1 ; }
 
@@ -255,7 +255,7 @@ echo "################################################################"
 echo Sending to OBS
 
 # Update to ensure we can overwrite - git is master
-(cd $OBSDIR; OSC up) || true
+(cd $OBSDIR && OSC up) || true
 
 # Build succeeded - clean out the OBS dir and use new tarballs
 find $OBSDIR -mindepth 1 -maxdepth 1 -type f -name "[^_]*" -print0 | xargs -0 rm -f 
