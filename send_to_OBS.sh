@@ -211,7 +211,7 @@ else
     if [[ $REAL == "no" ]]; then
 	add_sha1_to_version
     fi
-    dpkg-buildpackage -S -uc -us -tc
+    dpkg-buildpackage -S -uc -us -tc -i -I
 fi
 
 # If we have GBP then apply patches (in debian/) for any gem build
