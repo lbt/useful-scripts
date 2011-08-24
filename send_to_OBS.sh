@@ -135,7 +135,7 @@ trap "git checkout -f $BRANCH; exit" INT TERM EXIT
 HEADSHA1=$(git rev-parse --short HEAD)
 
 # Override the upstream/debian specified in gbp.conf (unless -r later)
-USING_BRANCHES=" --git-debian-branch=$BRANCH --git-upstream-branch=$BRANCH "
+USING_BRANCHES=" --git-debian-branch=$BRANCH --git-upstream-branch=$BRANCH --git-upstream-tree=branch"
 
 REAL=no
 while getopts "p:r" opt; do
