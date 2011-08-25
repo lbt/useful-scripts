@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+#set -x
 set -e
 
 require_clean_work_tree () {
@@ -98,7 +98,7 @@ OBSBASE=
 # Where git-buidlpackage is setup to produce builds, configured in
 # /etc/git-buildpackage
 BUILDAREA=
-# NAMESPACE is an apiurl alias with osc which is also used as a dir under OBSBASE
+# NAMESPACE is an optional apiurl alias with osc which is also used as a dir under OBSBASE
 # (setup in oscrc)
 NAMESPACE=
 EOF
@@ -135,7 +135,16 @@ trap "git checkout -f $BRANCH; exit" INT TERM EXIT
 HEADSHA1=$(git rev-parse --short HEAD)
 
 # Override the upstream/debian specified in gbp.conf (unless -r later)
-USING_BRANCHES=" --git-debian-branch=$BRANCH --git-upstream-branch=$BRANCH --git-upstream-tree=branch"
+USING_BRANCHES=" --git-debian-branch=$BRANCH --git-upstream-branch=$BRANCH "
+
+if [ -x /usr/bin/git-buildpackage ]; then
+  # Behaviour changed starting from 0.5.27
+  GBP_MIN_VER=$(git-buildpackage --version | cut -d ' ' -f 2 | cut -d '.' -f 2)
+  GBP_MIC_VER=$(git-buildpackage --version | cut -d ' ' -f 2 | cut -d '.' -f 3)
+  if [[ $GBP_MIN_VER -ge 5 ]] && [[ $GBP_MIC_VER -ge 27 ]]; then 
+    USING_BRANCHES="$USING_BRANCHES --git-upstream-tree=branch "
+  fi
+fi
 
 REAL=no
 while getopts "p:r" opt; do
