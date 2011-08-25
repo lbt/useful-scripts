@@ -288,7 +288,8 @@ mv pkg/*.gem $OBSDIR/ 2>/dev/null || true
 dpkg-parsechangelog -c1 | (
     cd $OBSDIR
     # Rename symlinks to truename for OBS
-    (l=$(find . -maxdepth 1 -type l -print -quit) && t=$(readlink $l) && rm $l && mv $t $l) || true
+    #(l=$(find . -maxdepth 1 -type l -print -quit) && t=$(readlink $l) && rm $l && mv $t $l) || true
+    (l=$(find . -maxdepth 1 -type l -print -quit); [[ $l ]] && t=$(readlink $l) && rm $l && mv $t $l) || true
     OSC ar
     OSC ci --skip-validation -F -
 )
