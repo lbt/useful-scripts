@@ -142,7 +142,7 @@ if [ -x /usr/bin/git-buildpackage ]; then
   GBP_MIN_VER=$(git-buildpackage --version | cut -d ' ' -f 2 | cut -d '.' -f 2)
   GBP_MIC_VER=$(git-buildpackage --version | cut -d ' ' -f 2 | cut -d '.' -f 3)
 if [[ $GBP_MIN_VER -ge 5 ]] && [[ $GBP_MIC_VER -ge 27 ]] ; then
-  USING_BRANCHES="$USING_BRANCHES --git-upstream-tree=branch "
+  UPSTREAM_TREE=" --git-upstream-tree=branch "
 fi
 fi
 
@@ -214,7 +214,7 @@ if [[ -f debian/gbp.conf ]]; then
     if [[ $REAL == "no" ]]; then
 	add_sha1_to_version
     fi
-    git-buildpackage --git-export-dir="$BUILD" --git-ignore-new -S -uc -us -tc $USING_BRANCHES
+    git-buildpackage --git-export-dir="$BUILD" $UPSTREAM_TREE $USING_BRANCHES --git-ignore-new -S -uc -us -tc
 else
     GBP="no"
     if [[ $REAL == "no" ]]; then
