@@ -261,7 +261,7 @@ if [[ $GBP == "yes" ]]; then
 fi
 
 echo "################################################################"
-echo Sending to OBS
+echo Sending to OBS in $OBSDIR
 
 # Update to ensure we can overwrite - git is master
 (cd $OBSDIR && OSC up) || true
