@@ -87,6 +87,11 @@ BUILDAREA=/some/tmp/build-area
 # NAMESPACE is optional dir under OBSBASE also used as apiurl alias with osc
 # (setup in oscrc)
 #NAMESPACE=
+# Missing Project Source
+# If you try and send a package which isn't in the target then it's
+# copied from here:
+MISSING_PROJECT=
+
 
 # Override above with personal values
 if [ -e  "$HOME/.send_to_OBS.conf" ]; then
@@ -101,6 +106,10 @@ BUILDAREA=
 # NAMESPACE is an optional apiurl alias with osc which is also used as a dir under OBSBASE
 # (setup in oscrc)
 NAMESPACE=
+# Missing Project Source
+# If you try and send a package which isn't in the target then it's
+# copied from here:
+MISSING_PROJECT=Project:MINT:Testing
 EOF
 	echo "Please set the required configuration values in $HOME/.send_to_OBS.conf"
 	exit 1
@@ -156,7 +165,8 @@ while getopts "p:r" opt; do
 		( cd $OBSBASE && OSC co $OPTARG )
 	    }
 
-	    OBSPROJ=$(cd $OBSBASE/$OPTARG;pwd)
+	    OBSPROJ=$OPTARG
+	    OBSPROJDIR=$(cd $OBSBASE/$OPTARG;pwd)
 	    ;;
 	r ) REAL=yes
 	    # This is real - don't override the upstream/debian specified in gbp.conf
@@ -171,14 +181,23 @@ done
 shift $(($OPTIND - 1))
 
 PACKAGE=${1:-$(basename $(pwd))}
-OBSDIR=$OBSPROJ/$PACKAGE
+OBSDIR=$OBSPROJDIR/$PACKAGE
 
-[[ -d $OBSDIR ]] || { 
+echo Checking for $OBSPROJ/$PACKAGE
+if ! OSC ls $OBSPROJ $PACKAGE >/dev/null 2>&1 ; then
+    if [[ $MISSING_PROJECT ]] ; then
+	echo "Attempting copy of $PACKAGE from $MISSING_PROJECT to $OBSPROJ"
+	OSC copypac $MISSING_PROJECT $PACKAGE $OBSPROJ
+    else
+	OSC mkpac $PACKAGE
+    fi
+fi
+
+[[ -d $OBSDIR ]] || {
     echo attempt to get $PACKAGE from OBS
-    ( cd $OBSPROJ && {
-        OSC co $PACKAGE || OSC mkpac $PACKAGE
-    } )
+    ( cd $OBSPROJDIR && OSC co $PACKAGE )
 }
+
 [[ ! -d $OBSDIR ]] && { echo $OBSDIR not present ; exit 1 ; }
 
 [[ ! -d $BUILDAREA ]] && mkdir $BUILDAREA
