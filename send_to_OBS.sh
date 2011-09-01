@@ -32,8 +32,8 @@ require_clean_work_tree () {
 }
 
 add_sha1_to_version() {
-    sed -i "1s/)/git${HEADSHA1})/" debian/changelog
-    sed -i "/Release:/s/$/git${HEADSHA1}/" rpm/*.spec || true
+    sed -i "1s/)/~git${HEADSHA1})/" debian/changelog
+    sed -i "/Release:/s/$/~git${HEADSHA1}/" rpm/*.spec || true
     git branch -f tmp_sha1
     git checkout tmp_sha1
     git add debian/changelog
